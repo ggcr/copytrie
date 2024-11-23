@@ -43,6 +43,11 @@ func (t *Trie) Get(key string) interface{} {
 	return node.value
 }
 
+func (t *Trie) Remove(key string) *Trie {
+	t.removeHelper(t.root, key)
+	return t
+}
+
 func (t *Trie) removeHelper(node *Node, key string) bool {
 	if len(key) == 0 {
 		node.value = nil
@@ -58,10 +63,5 @@ func (t *Trie) removeHelper(node *Node, key string) bool {
 		}
 		return false
 	}
-}
-
-func (t *Trie) Remove(key string) *Trie {
-	t.removeHelper(t.root, key)
-	return t
 }
 
