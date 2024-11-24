@@ -174,3 +174,71 @@ func TestTrieRemovalNodePresent(t *testing.T) {
 		t.Errorf("Expected 'cat' to NOT be removed, however it does not exist")
 	}
 }
+
+func TestTrieCopyPutOps(t *testing.T) {
+	trie := New()
+
+	trie1 := trie.Put("hello", 16)
+	trie2 := trie1.Put("hello", 32)
+	trie3 := trie2.Put("hello", 64)
+
+	// Validate that we do not modify trie by ref
+	val1 := trie1.Get("hello")
+	val2 := trie2.Get("hello")
+	val3 := trie3.Get("hello")
+	if val1 != 16 || val2 != 32 || val3 != 64 {
+		t.Errorf("Values got overwritten on different tries. Got val1=%v, val2=%v, val3=%v", val1, val2, val3)
+	}
+
+	// New key should not be present in original trie instances
+	trie4 := trie3.Put("test", "hello")
+	val1 = trie1.Get("test")
+	val2 = trie2.Get("test")
+	val3 = trie3.Get("test")
+	if val1 != nil || val2 != nil || val3 != nil {
+		t.Errorf("Earlier tries have access to keys added in newer tries.")
+	}
+
+	// New key should be present on the new trie instance
+	val4 := trie4.Get("test")
+	if val4 != "hello" {
+		t.Errorf("Expected 'hello', got %v", val4)
+	}
+}
+
+func TestTrieCopyRemoveOps(t *testing.T) {
+	trie := New()
+
+	trie1 := trie.Put("hello", 16)
+	trie2 := trie1.Put("world", 32)
+	trie3 := trie2.Put("golang", 64)
+
+	trie4 := trie3.Remove("world")
+
+	if trie4.Get("world") != nil {
+		t.Errorf("'world' should be removed in trie4.")
+	}
+	if trie2.Get("world") == nil {
+		t.Errorf("'world' should still exist in trie2.")
+	}
+
+	val1 := trie1.Get("hello")
+	val2 := trie2.Get("hello")
+	val3 := trie3.Get("golang")
+	if val1 != 16 || val2 != 16 || val3 != 64 {
+		t.Errorf("Values got overwritten unexpectedly. val1=%v, val2=%v, val3=%v", val1, val2, val3)
+	}
+
+	if trie4.Get("golang") != 64 {
+		t.Errorf("'golang' should still exist in trie4.")
+	}
+
+	trie5 := trie3.Remove("hello")
+
+	if trie5.Get("hello") != nil {
+		t.Errorf("'hello' should be removed in trie5.")
+	}
+	if trie3.Get("hello") == nil {
+		t.Errorf("'hello' should still exist in trie3.")
+	}
+}

@@ -1,5 +1,9 @@
 package trie
 
+import (
+	"github.com/brunoga/deep"
+)
+
 type Node struct {
 	value interface{}
 	children map[rune]*Node
@@ -13,9 +17,13 @@ func New() *Trie {
 	return &Trie{root: &Node{children: make(map[rune]*Node)}}
 }
 
+
+// Main API
+
 func (t *Trie) Put(key string, value interface{}) *Trie {
 	if len(key) == 0 || value == nil { return t }
-	node := t.root
+	newroot := deep.MustCopy(t.root)
+	node := newroot
 	for i := 0; i < len(key); i++ {
 		ch := rune(key[i])
 		nextN, ok := node.children[ch]
@@ -26,7 +34,7 @@ func (t *Trie) Put(key string, value interface{}) *Trie {
 		node = nextN
 	}
 	node.value = value
-	return t
+	return &Trie{root: newroot}
 }
 
 func (t *Trie) Get(key string) interface{} {
@@ -44,9 +52,13 @@ func (t *Trie) Get(key string) interface{} {
 }
 
 func (t *Trie) Remove(key string) *Trie {
-	t.removeHelper(t.root, key)
-	return t
+	cp_t := &Trie{root: deep.MustCopy(t.root)}
+	cp_t.removeHelper(cp_t.root, key)
+	return cp_t
 }
+
+
+// Helper functions
 
 func (t *Trie) removeHelper(node *Node, key string) bool {
 	if len(key) == 0 {
