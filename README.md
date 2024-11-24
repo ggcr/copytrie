@@ -11,8 +11,8 @@ A persistent trie (prefix tree) implementation in Go that uses copy-on-write. Ea
 package main
 
 import (
-	 "fmt"
-	 "github.com/ggcr/copytrie/trie" // Import
+    "fmt"
+    "github.com/ggcr/copytrie/trie" // Import
 )
 
 func main() {
