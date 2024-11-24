@@ -35,7 +35,7 @@ func main() {
 ## Tests
 You can clone it locally and run tests if needed:
 ```bash
-git clone https://github.com/yourusername/copytrie.git
+git clone https://github.com/ggcr/copytrie.git
 cd copytrie
 go test ./... -v
 ```
