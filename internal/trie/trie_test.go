@@ -242,3 +242,35 @@ func TestTrieCopyRemoveOps(t *testing.T) {
 		t.Errorf("'hello' should still exist in trie3.")
 	}
 }
+
+func TestTrieExample(t *testing.T) {
+	t0 := New()
+	t1 := t0.Put("test", "hello")     // Put
+	t2 := t1.Put("test", 32)          // Update
+	t3 := t2.Put("testing", "works")  // New key
+	t4 := t3.Remove("test")           // Remove
+
+	if val := t1.Get("test"); val != "hello" {
+		t.Errorf("t1: Expected 'hello', got %v", val)
+	}
+
+	if val := t2.Get("test"); val != 32 {
+		t.Errorf("t2: Expected 32, got %v", val)
+	}
+
+	if val := t3.Get("testing"); val != "works" {
+		t.Errorf("t3: Expected 'works', got %v", val)
+	}
+
+	if val := t3.Get("test"); val != 32 {
+		t.Errorf("t3: Expected 32 for 'test', got %v", val)
+	}
+
+	if val := t4.Get("test"); val != nil {
+		t.Errorf("t4: Expected nil for removed key 'test', got %v", val)
+	}
+
+	if val := t4.Get("testing"); val != "works" {
+		t.Errorf("t4: Expected 'works' for 'testing', got %v", val)
+	}
+}
