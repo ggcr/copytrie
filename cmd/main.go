@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	// Local
-	"github.com/ggcr/copytrie/internal/trie"
+	"github.com/ggcr/copytrie/trie"
 )
 
 func main() {
