@@ -5,16 +5,16 @@ import (
 )
 
 type Node struct {
-	value interface{}
-	children map[rune]*Node
+	Value interface{}
+	Children map[rune]*Node
 }
 
 type Trie struct {
-	root *Node
+	Root *Node
 }
 
 func New() *Trie {
-	return &Trie{root: &Node{children: make(map[rune]*Node)}}
+	return &Trie{Root: &Node{Children: make(map[rune]*Node)}}
 }
 
 
@@ -22,38 +22,38 @@ func New() *Trie {
 
 func (t *Trie) Put(key string, value interface{}) *Trie {
 	if len(key) == 0 || value == nil { return t }
-	newroot := deep.MustCopy(t.root)
+	newroot := deep.MustCopy(t.Root)
 	node := newroot
 	for i := 0; i < len(key); i++ {
 		ch := rune(key[i])
-		nextN, ok := node.children[ch]
+		nextN, ok := node.Children[ch]
 		if ok != true {
-			nextN = &Node{children: make(map[rune]*Node)}
-			node.children[ch] = nextN
+			nextN = &Node{Children: make(map[rune]*Node)}
+			node.Children[ch] = nextN
 		}
 		node = nextN
 	}
-	node.value = value
-	return &Trie{root: newroot}
+	node.Value = value
+	return &Trie{Root: newroot}
 }
 
 func (t *Trie) Get(key string) interface{} {
 	if len(key) == 0 { return nil }
-	node := t.root
+	node := t.Root
 	for i := 0; i < len(key); i++ {
 		ch := rune(key[i])
-		nextN, ok := node.children[ch]
+		nextN, ok := node.Children[ch]
 		if ok != true {
 			return nil
 		}
 		node = nextN
 	}
-	return node.value
+	return node.Value
 }
 
 func (t *Trie) Remove(key string) *Trie {
-	cp_t := &Trie{root: deep.MustCopy(t.root)}
-	cp_t.removeHelper(cp_t.root, key)
+	cp_t := &Trie{Root: deep.MustCopy(t.Root)}
+	cp_t.removeHelper(cp_t.Root, key)
 	return cp_t
 }
 
@@ -62,16 +62,16 @@ func (t *Trie) Remove(key string) *Trie {
 
 func (t *Trie) removeHelper(node *Node, key string) bool {
 	if len(key) == 0 {
-		node.value = nil
-		return len(node.children) == 0
+		node.Value = nil
+		return len(node.Children) == 0
 	} else {
 		ch := rune(key[0])
-		if nextN, ok := node.children[ch]; ok {
+		if nextN, ok := node.Children[ch]; ok {
 			ret := t.removeHelper(nextN, key[1:])
 			if ret == true {
-				delete(node.children, ch)
+				delete(node.Children, ch)
 			}
-			return ret == true && len(node.children) == 0
+			return ret == true && len(node.Children) == 0
 		}
 		return false
 	}
