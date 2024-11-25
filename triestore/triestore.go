@@ -1,29 +1,39 @@
-package trie
+package triestore
 
 import (
-	"github.com/brunoga/deep"
+	"sync"
 )
+
+type ValueGuard struct {
+	Value interface{}
+	TrieStore *TrieStore
+}
 
 type Node struct {
 	Value interface{}
 	Children map[rune]*Node
 }
 
-type Trie struct {
+type TrieStore struct {
+	mutex sync.RWMutex
 	Root *Node
 }
 
-func New() *Trie {
-	return &Trie{Root: &Node{Children: make(map[rune]*Node)}}
+func New() *TrieStore {
+	return &TrieStore{Root: &Node{Children: make(map[rune]*Node)}}
 }
 
 
 // Main API
 
-func (t *Trie) Put(key string, value interface{}) *Trie {
-	if len(key) == 0 || value == nil { return t }
-	newroot := deep.MustCopy(t.Root)
-	node := newroot
+func (t *TrieStore) Put(key string, value interface{}) {
+	if len(key) == 0 || value == nil { return }
+
+	// exclusive write (wrlock)
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
+	node := t.Root
 	for i := 0; i < len(key); i++ {
 		ch := rune(key[i])
 		nextN, ok := node.Children[ch]
@@ -34,11 +44,15 @@ func (t *Trie) Put(key string, value interface{}) *Trie {
 		node = nextN
 	}
 	node.Value = value
-	return &Trie{Root: newroot}
 }
 
-func (t *Trie) Get(key string) interface{} {
-	if len(key) == 0 { return nil }
+func (t *TrieStore) Get(key string) *ValueGuard {
+	if len(key) == 0 { return &ValueGuard{TrieStore: t} }
+
+	// multiple reads (rlock)
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
 	node := t.Root
 	for i := 0; i < len(key); i++ {
 		ch := rune(key[i])
@@ -48,20 +62,22 @@ func (t *Trie) Get(key string) interface{} {
 		}
 		node = nextN
 	}
-	return node.Value
+	return &ValueGuard{Value: node.Value, TrieStore: t}
 }
 
-func (t *Trie) Remove(key string) *Trie {
+func (t *TrieStore) Remove(key string) {
 	if len(key) == 0 { return }
-	cp_t := &Trie{Root: deep.MustCopy(t.Root)}
-	cp_t.removeHelper(cp_t.Root, key)
-	return cp_t
+	// exclusive write (wrlock)
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
+	t.removeHelper(t.Root, key)
 }
 
 
 // Helper functions
 
-func (t *Trie) removeHelper(node *Node, key string) bool {
+func (t *TrieStore) removeHelper(node *Node, key string) bool {
 	if len(key) == 0 {
 		node.Value = nil
 		return len(node.Children) == 0
@@ -77,4 +93,3 @@ func (t *Trie) removeHelper(node *Node, key string) bool {
 		return false
 	}
 }
-

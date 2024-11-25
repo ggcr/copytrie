@@ -1,4 +1,4 @@
-module github.com/ggcr/copytrie
+module github.com/ggcr/triestore
 
 go 1.23.0
 

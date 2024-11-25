@@ -1,8 +1,9 @@
-package trie_test
+package triestore_test
 
 import (
 	"testing"
-	"github.com/ggcr/copytrie/trie"
+	"fmt"
+	"github.com/ggcr/triestore/copytrie"
 )
 
 func TestTrieConstruct(t *testing.T) {
@@ -273,5 +274,45 @@ func TestTrieExample(t *testing.T) {
 
 	if val := t4.Get("testing"); val != "works" {
 		t.Errorf("t4: Expected 'works' for 'testing', got %v", val)
+	}
+}
+
+func TestTrieSequential(t *testing.T) {
+	tr := trie.New()
+	totalTh := 50
+	
+	for i := 0; i < totalTh; i++ { // puts
+		key := fmt.Sprintf("%05d", i)
+		value := fmt.Sprintf("value-%08d", i)
+		tr = tr.Put(key, value)
+	}
+	for i := 0; i < totalTh; i+=2 { // update even keys
+		key := fmt.Sprintf("%05d", i)
+		value := fmt.Sprintf("new-value-%08d", i)
+		tr = tr.Put(key, value)
+	}
+	for i := 0; i < totalTh; i+=3 { // remove triplet keys
+		key := fmt.Sprintf("%05d", i)
+		tr = tr.Remove(key)
+	}
+
+	// verify
+	for i := 0; i < totalTh; i++ {
+		key := fmt.Sprintf("%05d", i)
+		if i % 3 == 0 { // key should not be on the trie
+			if vg1 := tr.Get(key); vg1 != nil {
+				t.Errorf("Expected Trie to be empty after removal, got guard value %+v instead.", vg1)
+			}
+		} else if i % 2 == 0 { // key should contain the updated version
+			exp := fmt.Sprintf("new-value-%08d", i)
+			if vg2 := tr.Get(key); vg2 != exp {
+				t.Errorf("Expected %+v, got guard value %+v instead.", exp, vg2)
+			}
+		} else { // key should contain the original value
+			exp := fmt.Sprintf("value-%08d", i)
+			if vg3 := tr.Get(key); vg3 != exp {
+				t.Errorf("Expected %+v, got guard value %+v instead.", exp, vg3)
+			}
+		}
 	}
 }
