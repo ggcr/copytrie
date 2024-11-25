@@ -52,6 +52,7 @@ func (t *Trie) Get(key string) interface{} {
 }
 
 func (t *Trie) Remove(key string) *Trie {
+	if len(key) == 0 { return }
 	cp_t := &Trie{Root: deep.MustCopy(t.Root)}
 	cp_t.removeHelper(cp_t.Root, key)
 	return cp_t
