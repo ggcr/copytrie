@@ -42,9 +42,10 @@ go test ./... -v
 
 Check out the tests output:
 
-  ```bash
+```
 go test ./... -v
 ?       github.com/ggcr/copytrie/cmd    [no test files]
+?       github.com/ggcr/copytrie/trie   [no test files]
 === RUN   TestTrieConstruct
 --- PASS: TestTrieConstruct (0.00s)
 === RUN   TestTrieEmptyKey
@@ -78,6 +79,6 @@ go test ./... -v
 === RUN   TestTrieExample
 --- PASS: TestTrieExample (0.00s)
 PASS
-ok      github.com/ggcr/copytrie/trie
+ok      github.com/ggcr/copytrie/test   0.285s
 ```
 </details>
